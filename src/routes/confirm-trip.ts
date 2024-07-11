@@ -32,7 +32,17 @@ export async function confirmTrips(app : FastifyInstance) {
 
         const tripUpdated = await prisma.trip.update({ 
                 data: {
-                  is_confirmed : true
+                  is_confirmed : true,
+                  participants :{
+                    updateMany : {
+                        data : {
+                            is_confirmed : true
+                        },
+                        where :{
+                            is_owner : true
+                        }
+                    }
+                  }
                 }, 
                 where: {
                     id : trip.id
@@ -49,27 +59,24 @@ export async function confirmTrips(app : FastifyInstance) {
                     id          : true
             }    
         })
-
-
-         const formattedStartDate = getDateFormattedToPtBr(tripUpdated.starts_at);
-         const formattedEndDate   = getDateFormattedToPtBr(tripUpdated.ends_at);
-         const confirmationLink   = `http://localhost:1011/trips/${tripUpdated.id}/confirm/:userId`
-
-         const mail = await getMailCliente();
+        
+        const mail = await getMailCliente();
 
         await Promise.all(
             tripUpdated.participants.map(async (participant) => {
+                const confirmationLink   = `${process.env.API_URL}/trips/${tripUpdated.id}/confirm/${participant.id}`
+                
                 const message = await mail.sendMail({
                     from : {
                         name    : 'Equipe plann.er',
                         address : 'talkWithPln@planner.com'
                     },
                     to: {
-                        name    : participant.name  || ' ', 
+                        name    : participant.name  || '', 
                         address : participant.email
                     }, 
                     subject : `Confirme sua presença na viagem para ${tripUpdated.destination} em ${getDateFormattedToPtBr(tripUpdated.starts_at)}`,
-                    html    : getComponentMailSendToConfirmTrip({destination : tripUpdated.destination, ends_at : tripUpdated.ends_at, starts_at : tripUpdated.starts_at})
+                    html    : getComponentMailSendToConfirmTrip({destination : tripUpdated.destination, ends_at : tripUpdated.ends_at, starts_at : tripUpdated.starts_at, confirmationLink})
                 });
                 
                 console.log(nodemailer.getTestMessageUrl(message));    
