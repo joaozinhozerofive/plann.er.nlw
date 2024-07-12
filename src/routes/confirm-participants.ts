@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
+import { ClientError } from "../errors/client-error";
 
 export async function confirmParticipants(app : FastifyInstance) {
     app.withTypeProvider<ZodTypeProvider>().get('/trips/:tripId/confirm/:participantId', {
@@ -21,7 +22,7 @@ export async function confirmParticipants(app : FastifyInstance) {
         });
 
         if(!trip) {
-            throw new Error(`Viagem não encontrada.`);
+            throw new ClientError(`Viagem não encontrada.`, 404);
         }
 
         const participant = await prisma.participant.findUnique({
@@ -32,11 +33,11 @@ export async function confirmParticipants(app : FastifyInstance) {
         })
 
         if(!participant) {
-            throw new Error(`Participante não encontrado.`);
+            throw new ClientError(`Participante não encontrado.`, 404);
         }
 
         if(participant.is_confirmed) {
-            return reply.redirect(`http://localhost:1011/confirm/${trip.id}/participant/${participant.id}`);
+            return reply.redirect(`${process.env.WEB_URL}/confirm/${trip.id}/participant/${participant.id}`);
         }
 
         try {
@@ -60,7 +61,7 @@ export async function confirmParticipants(app : FastifyInstance) {
         })
         }
         catch {
-            throw new Error('Não foi possível confirmar sua presença na viagem, entre em contato com o suporte.');
+            throw new ClientError('Não foi possível confirmar sua presença na viagem, entre em contato com o suporte.', 400);
         }
     })
 }

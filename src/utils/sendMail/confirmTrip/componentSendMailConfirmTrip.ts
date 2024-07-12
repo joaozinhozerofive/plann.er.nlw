@@ -2,7 +2,7 @@ import  dayjs from "dayjs";
 import lozalizedFormat from "dayjs/plugin/localizedFormat";
 import 'dayjs/locale/pt-br';
 import { env } from "process";
-import { getDateFormattedToPtBr } from "../../lib/dayjs";
+import { getDateFormattedToPtBr } from "../../../lib/dayjs";
 
 dayjs.locale('pt-br');
 dayjs.extend(lozalizedFormat);

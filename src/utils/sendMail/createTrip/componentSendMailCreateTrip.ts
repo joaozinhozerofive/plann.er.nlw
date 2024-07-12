@@ -1,4 +1,4 @@
-import { getDateFormattedToPtBr } from "../../lib/dayjs";
+import { getDateFormattedToPtBr } from "../../../lib/dayjs";
 
 
 interface ComponenteEmailProps {

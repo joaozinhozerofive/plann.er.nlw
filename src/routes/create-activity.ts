@@ -3,6 +3,7 @@ import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import dayjs from "dayjs";
+import { ClientError } from "../errors/client-error";
 
 export async function createActivity(app : FastifyInstance) {
     app.withTypeProvider<ZodTypeProvider>().post(
@@ -28,15 +29,15 @@ export async function createActivity(app : FastifyInstance) {
             })
 
             if(!trip) {
-                throw new Error('Viagem não encontrada.');
+                throw new ClientError('Viagem não encontrada.', 404);
             }
 
             if(dayjs(occurs_at).isBefore(trip.starts_at)) {
-                throw new Error('Data da atividade menor do que a data de início da viagem.');
+                throw new ClientError('Data da atividade menor do que a data de início da viagem.', 400);
             }
 
             if(dayjs(occurs_at).isAfter(trip.ends_at)) {
-                throw new Error('Data da atividade menor do que a data final da viagem.');
+                throw new ClientError('Data da atividade menor do que a data final da viagem.', 400);
             }
 
             const activity =  await prisma.activity.create({

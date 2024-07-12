@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
+import { ClientError } from "../errors/client-error";
 
 export async function createLink(app : FastifyInstance) {
     app.withTypeProvider<ZodTypeProvider>().post('/trips/:tripId/links', {
@@ -25,7 +26,7 @@ export async function createLink(app : FastifyInstance) {
         })
 
         if(!trip) {
-            throw new Error('Viagem não encontrada.');
+            throw new ClientError('Viagem não encontrada.', 404);
         }
 
        try {
@@ -41,7 +42,7 @@ export async function createLink(app : FastifyInstance) {
         
        }
        catch {
-        throw new Error("Não foi possível criar o link");
+        throw new ClientError("Não foi possível criar o link", 400);
        }
 
     })

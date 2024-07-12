@@ -5,7 +5,8 @@ import { prisma } from "../lib/prisma";
 import { getMailCliente } from "../lib/mail";
 import nodemailer from "nodemailer";
 import { getDateFormattedToPtBr } from "../lib/dayjs";
-import { getComponentMailSendToConfirmTrip } from "../utils/confirmTrip/componentSendMailConfirmTrip";
+import { getComponentMailSendToConfirmTrip } from "../utils/sendMail/confirmTrip/componentSendMailConfirmTrip";
+import { ClientError } from "../errors/client-error";
 
 export async function confirmTrips(app : FastifyInstance) {
     app.withTypeProvider<ZodTypeProvider>().get('/trips/:tripId/confirm', {
@@ -23,7 +24,7 @@ export async function confirmTrips(app : FastifyInstance) {
         });
 
         if(!trip) {
-            throw new Error(`Viagem não encontrada.`);
+            throw new ClientError(`Viagem não encontrada.`, 404);
         }
 
         if(trip.is_confirmed) {

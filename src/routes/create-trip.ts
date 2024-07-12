@@ -5,8 +5,9 @@ import { prisma } from "../lib/prisma";
 import dayjs from "dayjs";
 import {getMailCliente} from '../lib/mail';
 import nodemailer from "nodemailer";
-import { getComponentMailSendToCreateTrip } from "../utils/createTrip/componentSendMailCreateTrip";
 import { getDateFormattedToPtBr } from "../lib/dayjs";
+import { getComponentMailSendToCreateTrip } from "../utils/sendMail/createTrip/componentSendMailCreateTrip";
+import { ClientError } from "../errors/client-error";
 
 export async function createTrips(app : FastifyInstance) {
     app.withTypeProvider<ZodTypeProvider>().post('/trips', {
@@ -24,11 +25,11 @@ export async function createTrips(app : FastifyInstance) {
         const { destination, starts_at, ends_at, owner_name, owner_email, emails_to_invite} = request.body;
 
         if(dayjs(starts_at).isBefore(new Date())) {
-            throw new Error('Data de início da viagem inválida.') ;
+            throw new ClientError('Data de início da viagem inválida.',400);
         }
 
         if(dayjs(ends_at).isBefore(starts_at)) {
-            throw new Error('Data final da viagem inválida.')
+            throw new ClientError('Data final da viagem inválida.',400);
         }
 
         let dataCreateInvitedParticipants = emails_to_invite.map(email => {
@@ -80,7 +81,7 @@ export async function createTrips(app : FastifyInstance) {
         return { tripId : trip.id };
        }
        catch {
-        throw new Error('Não foi possível inserir os dados da viagem.');
+        throw new ClientError('Não foi possível inserir os dados da viagem.', 404);
        }
     })
 }
