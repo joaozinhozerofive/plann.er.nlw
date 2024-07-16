@@ -42,6 +42,8 @@ app.register(getParticipant);
 
 const PORT = Number(process.env.LISTEN_PORT);
 
+console.log(process.env);
+
 app.listen({port : PORT}).then(() => {
     console.log('Server is Running!');
 });

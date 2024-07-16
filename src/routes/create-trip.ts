@@ -81,7 +81,7 @@ export async function createTrips(app : FastifyInstance) {
         return { tripId : trip.id };
        }
        catch {
-        throw new ClientError('Não foi possível inserir os dados da viagem.', 404);
+        throw new ClientError('Não foi possível inserir os dados da viagem.',400);
        }
     })
 }
